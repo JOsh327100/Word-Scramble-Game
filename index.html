@@ -182,6 +182,100 @@
                 font-size: 2.5em;
             }
         }
+
+        /* Media query for small screens (phones under 480px) */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+                max-width: 95%;
+            }
+            h1 {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+            #level, #scrambledWord, #countdown, #timeUpMessage, #answer {
+                font-size: 1em;
+                padding: 8px;
+            }
+            #scrambledWord {
+                font-size: 2em;
+                letter-spacing: 3px;
+            }
+            button {
+                padding: 10px 20px;
+                margin: 8px;
+                font-size: 14px;
+            }
+            input[type="text"] {
+                width: 90%;
+                max-width: 250px;
+                padding: 8px;
+                font-size: 14px;
+            }
+            .modal-content {
+                margin: 20% auto;
+                padding: 20px;
+                width: 90%;
+                max-width: 400px;
+            }
+            #correctAnswerText {
+                font-size: 2em;
+            }
+        }
+
+        /* Media query for medium screens (tablets, 769px to 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 25px;
+                max-width: 700px;
+            }
+            h1 {
+                font-size: 2.2em;
+            }
+            #scrambledWord {
+                font-size: 3em;
+            }
+            button {
+                padding: 14px 28px;
+                font-size: 17px;
+            }
+            input[type="text"] {
+                width: 85%;
+                max-width: 350px;
+            }
+            .modal-content {
+                margin: 10% auto;
+                width: 85%;
+                max-width: 600px;
+            }
+        }
+
+        /* Media query for large screens (desktops, 1025px+) */
+        @media (min-width: 1025px) {
+            .container {
+                max-width: 800px;
+                padding: 40px;
+            }
+            h1 {
+                font-size: 3em;
+            }
+            #scrambledWord {
+                font-size: 4em;
+            }
+            button {
+                padding: 15px 30px;
+                font-size: 18px;
+            }
+            input[type="text"] {
+                width: 80%;
+                max-width: 400px;
+            }
+            .modal-content {
+                margin: 5% auto;
+                width: 80%;
+                max-width: 700px;
+            }
+        }
     </style>
 </head>
 <body>
