@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Word Scramble Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            z-index: 2;
+            position: relative;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #4a4a4a;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: float 2s ease-in-out infinite;
+        }
+        #level, #scrambledWord, #countdown, #timeUpMessage, #answer {
+            font-size: 1.2em;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #scrambledWord {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #007bff;
+            letter-spacing: 5px;
+        }
+        #countdown {
+            color: #ff5722;
+            font-weight: bold;
+        }
+        button {
+            padding: 12px 25px;
+            margin: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        #startBtn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+        #nextBtn {
+            background: linear-gradient(45deg, #007bff, #6610f2);
+            color: white;
+        }
+        #correctAnswerBtn {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            color: white;
+        }
+        #submitBtn {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+            color: white;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 300px;
+            margin: 10px 0;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 30px;
+            border: none;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .correct-answer-modal-content {
+            animation: float 2s ease-in-out infinite;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+        #correctAnswerText {
+            font-size: 3em;
+            font-weight: bold;
+            color: #007bff;
+            animation: float 2s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            object-fit: cover;
+            filter: brightness(0.5);
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            #scrambledWord {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <video autoplay loop muted style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; object-fit: cover; filter: brightness(0.5);">
+        <source src="Yellow.mp4" type="video/mp4">
+    </video>
+    <div class="container">
+        <h1>Word Scramble Game</h1>
+        <div id="level">Level: Easy</div>
+        <div id="scrambledWord">----</div>
+        <div id="countdown">Ready?</div>
+        <div id="timeUpMessage"></div>
+
+        <button id="correctAnswerBtn" onclick="showCorrectAnswer()" style="display:none;">Correct Answer</button>
+        <button id="startBtn" onclick="startGame()">Start Game</button>
+        <button id="nextBtn" onclick="nextLevel()" style="display:none;">Next Level</button>
+        <div id="answer"></div>
+    </div>
+    <!-- Modals -->
+    <div id="overviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('overviewModal')">&times;</span>
+            <h2>Welcome to Word Scramble Game!</h2>
+            <p>Unscramble the words as fast as you can. There are three levels: Easy, Medium, and Hard.</p>
+            <button onclick="showGameModal()">Let's Play!</button>
+        </div>
+    </div>
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('gameModal')">&times;</span>
+            <h2>Game Instructions</h2>
+            <p>Guess the unscrambled word before time runs out.</p>
+            <button onclick="startGameFromModal()">Start Game</button>
+        </div>
+    </div>
+    <div id="correctAnswerModal" class="modal">
+        <div class="modal-content correct-answer-modal-content">
+            <span class="close" onclick="closeCorrectAnswerModal()">&times;</span>
+            <h2>Time's Up!</h2>
+            <p>The correct answer is: <strong id="correctAnswerText"></strong></p>
+            <button onclick="nextLevel()" style="display:none;">Next Level</button>
+        </div>
+    </div>
+    <!-- Level Modal -->
+    <div id="levelModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('levelModal')">&times;</span>
+            <h2 id="levelTitle">Next Level</h2>
+            <p id="levelDescription">You have completed the current level. Proceed to the next difficulty level.</p>
+            <button id="proceedBtn" onclick="proceedToNextLevel()">Proceed</button>
+        </div>
+    </div>
+    <!-- Background Music -->
+    <audio id="bgMusic" loop>
+        <source src="123go.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+const levels = {
+    Easy: ["FAMILY", "RELIGION", "ECONOMY"],
+    Medium: ["GOVERNMENT", "STABILITY"],
+    Hard: ["LEGITIMACY", "INSTITUTIONALISM"]
+};
+
+const scrambledLevels = {
+    Easy: ["YLYIMAF", "NOIGILER", "ECONOMY"],
+    Medium: ["GOVERNMENT", "STABILITY"],
+    Hard: ["LEGITIMACY", "INSTITUTIONALISM"]
+};
+
+let levelNames = ["Easy", "Medium", "Hard"];
+let roundsPerLevel = [3, 2, 2];
+let currentLevel = 0;
+let currentRound = 0;
+let currentWord = "";
+let timer;
+let countdownInterval;
+
+function showOverviewModal() {
+    document.getElementById("overviewModal").style.display = "block";
+}
+
+function showGameModal() {
+    document.getElementById("overviewModal").style.display = "none";
+    document.getElementById("gameModal").style.display = "block";
+}
+
+function startGameFromModal() {
+    document.getElementById("gameModal").style.display = "none";
+    startGame();
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+}
+
+// Show overview modal on page load
+window.onload = function() {
+    showOverviewModal();
+};
+
+function shuffleWord(word, level) {
+    const letters = word.split("");
+    if (level === "Easy") {
+        // For easy, swap only a few letters
+        for (let i = 0; i < Math.min(2, letters.length - 1); i++) {
+            const j = Math.floor(Math.random() * letters.length);
+            const k = Math.floor(Math.random() * letters.length);
+            [letters[j], letters[k]] = [letters[k], letters[j]];
+        }
+    } else if (level === "Medium") {
+        // For medium, swap more letters
+        for (let i = 0; i < Math.min(4, letters.length - 1); i++) {
+            const j = Math.floor(Math.random() * letters.length);
+            const k = Math.floor(Math.random() * letters.length);
+            [letters[j], letters[k]] = [letters[k], letters[j]];
+        }
+    } else {
+        // For hard, fully random
+        return letters.sort(() => Math.random() - 0.5).join("");
+    }
+    return letters.join("");
+}
+
+function startGame() {
+    document.getElementById("startBtn").style.display = "none";
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("answer").textContent = "";
+    document.getElementById("timeUpMessage").textContent = "";
+    document.getElementById("correctAnswerBtn").style.display = "none";
+
+    let countdownText = ["Ready...", "Get Set...", "GO!"];
+    let i = 0;
+
+    const countdown = setInterval(() => {
+        document.getElementById("countdown").textContent = countdownText[i];
+        i++;
+        if (i === countdownText.length) {
+            clearInterval(countdown);
+            beginRound();
+        }
+    }, 1000);
+}
+
+function beginRound() {
+    const level = levelNames[currentLevel];
+    document.getElementById("level").textContent = "Level: " + level;
+
+    const words = levels[level];
+    currentWord = words[currentRound];
+
+    let timeLimit;
+    if (level === "Easy") timeLimit = 20000;
+    else if (level === "Medium") timeLimit = 30000;
+    else timeLimit = 40000; // Hard
+
+    let remainingTime = timeLimit / 1000;
+
+    if (level === "Easy" && currentRound < 2) {
+        document.getElementById("scrambledWord").textContent = scrambledLevels.Easy[currentRound];
+    } else {
+        document.getElementById("scrambledWord").textContent = shuffleWord(currentWord, level);
+    }
+    document.getElementById("countdown").textContent = `⏱ ${remainingTime} seconds!`;
+
+    const bgMusic = document.getElementById("bgMusic");
+    bgMusic.currentTime = 0;
+    bgMusic.play();
+
+    countdownInterval = setInterval(() => {
+        remainingTime--;
+        document.getElementById("countdown").textContent = `⏱ ${remainingTime} seconds!`;
+        if (remainingTime <= 0) {
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
+
+    timer = setTimeout(() => {
+        revealAnswer();
+    }, timeLimit);
+}
+
+function checkAnswer() {
+    const userGuess = document.getElementById("userInput").value.toUpperCase().trim();
+    if (userGuess === currentWord) {
+        clearTimeout(timer);
+        clearInterval(countdownInterval);
+        document.getElementById("answer").textContent = "Correct!";
+        document.getElementById("userInput").disabled = true;
+        document.getElementById("submitBtn").disabled = true;
+        document.getElementById("nextBtn").style.display = "inline";
+        document.getElementById("bgMusic").pause();
+    } else {
+        document.getElementById("answer").textContent = "Incorrect, try again!";
+    }
+}
+
+function revealAnswer() {
+    document.getElementById("timeUpMessage").textContent = "Time's up!";
+    document.getElementById("correctAnswerBtn").style.display = "inline";
+    document.getElementById("bgMusic").pause();
+}
+
+function showCorrectAnswer() {
+    document.getElementById("correctAnswerText").textContent = currentWord;
+    document.getElementById("correctAnswerModal").style.display = "block";
+}
+
+function closeCorrectAnswerModal() {
+    document.getElementById("correctAnswerModal").style.display = "none";
+    document.getElementById("correctAnswerBtn").style.display = "none";
+    document.getElementById("nextBtn").style.display = "inline";
+}
+
+function nextLevel() {
+    clearTimeout(timer);
+    clearInterval(countdownInterval);
+    currentRound++;
+    if (currentRound >= roundsPerLevel[currentLevel]) {
+        currentRound = 0;
+        currentLevel++;
+        if (currentLevel >= levelNames.length) {
+            alert("🎉 You finished all levels!");
+            currentLevel = 0;
+            currentRound = 0;
+            document.getElementById("startBtn").style.display = "inline";
+        } else {
+            // Show level modal before proceeding to next level
+            document.getElementById("levelTitle").textContent = "Level: " + levelNames[currentLevel];
+            document.getElementById("levelDescription").textContent = "You have completed the current level. Proceed to the next difficulty level: " + levelNames[currentLevel] + ".";
+            document.getElementById("levelModal").style.display = "block";
+        }
+    } else {
+        document.getElementById("startBtn").style.display = "inline";
+    }
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("scrambledWord").textContent = "----";
+    document.getElementById("countdown").textContent = "Ready?";
+    document.getElementById("answer").textContent = "";
+    document.getElementById("bgMusic").pause();
+}
+
+function proceedToNextLevel() {
+    document.getElementById("levelModal").style.display = "none";
+    startGame();
+}
+
+// Add event listener for Enter key on input
+document.getElementById("userInput").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        checkAnswer();
+    }
+});
+    </script>
+</body>
+</html>
